@@ -11,6 +11,7 @@
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "outDir": "lib",
+    "allowSyntheticDefaultImports": true,
     "inlineSources": false,
     "strictNullChecks": false,
     "noUnusedLocals": false,
@@ -30,7 +31,8 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.tsx"
+    "src/**/*.tsx",
+    "declarations.d.ts"
   ],
   "exclude": [
     "node_modules",

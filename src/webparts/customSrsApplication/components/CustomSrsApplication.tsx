@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import styles from './CustomSrsApplication.module.scss';
 import { ICustomSrsApplicationProps } from './ICustomSrsApplicationProps';
 import { escape } from '@microsoft/sp-lodash-subset';
