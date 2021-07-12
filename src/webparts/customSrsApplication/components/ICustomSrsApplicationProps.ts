@@ -1,3 +1,8 @@
+import { SPHttpClient } from '@microsoft/sp-http';
+
 export interface ICustomSrsApplicationProps {
-  description: string;
+  spHttpClient: SPHttpClient;
+  siteUrl: string;
+  itemsList: string;
+  reviewsList: string;
 }
