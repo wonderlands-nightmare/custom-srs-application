@@ -1,25 +1,26 @@
 ##############
 ##  Variables
 ##############
-$siteUrl
-$appId
-$appSecret
-$packageName
-$packagePath
+$siteUrl = "https://alicedev.sharepoint.com/sites/appcatalog"
+$packageName = "custom-srs-application"
+$packagePath = "./sharepoint/solution"
 
 
 ##############
 ##  Build app
 ##############
-gulp clean
-gulp bundle --ship
-gulp package solution --ship
+gulp clean; gulp build; gulp bundle --ship; gulp package-solution --ship
+# gulp clean
+# gulp build
+# gulp bundle --ship
+# gulp package-solution --ship
 
 
 ##############
 ##  Connect and add app
 ##############
-Connect-PnPOnline -Url $siteUrl -AppId "$appId" -AppSecret "$appSecret"
+#Connect-PnPOnline -Url $siteUrl -AppId "$appId" -AppSecret "$appSecret"
+Connect-PnPOnline $siteUrl -UseWebLogin
 Write-Host "=-=-=-=-"
 Write-Host "Connected to $siteUrl."
 Write-Host "=-=-=-=-"

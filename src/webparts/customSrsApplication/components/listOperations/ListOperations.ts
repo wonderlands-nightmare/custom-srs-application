@@ -19,7 +19,6 @@ export function getItemList(listName, globalProps) {
     return response.json();
   })
   .then((returnedItems) => {
-    // console.log('returneditems', returnedItems);
     return returnedItems.value;
   });
 }
@@ -53,11 +52,9 @@ export function createItem(globalProps, state) {
     return response.json();
   })
   .then((createdItem) => {
-    // console.log('Item created', createdItem);
     return `${ createdItem.Item } has been created!`;
   },
   (error: any) => {
-    // console.log('Error creating item', error);
     return "There was an error creating items, see console for details.";
   });
 }
@@ -67,14 +64,16 @@ export function createItem(globalProps, state) {
 // ANCHOR Function - updateItem
 // Update an item in the Items List using API.
 //////////////////////////////
-export function updateItem(listName, itemId, newSrsStage, nextReviewTime, globalProps) {
-  // private updateItem(itemId) {
+export function updateItem(listName, itemToUpdate, globalProps) {
+  const itemId = itemToUpdate.ID;
+
   const body: string = JSON.stringify({
-    "SRS Stage": newSrsStage,
-    "Next review time": nextReviewTime
+    "SRSStage": itemToUpdate.SRSStage,
+    "Nextreviewtime": itemToUpdate.Nextreviewtime
   });
   
-  return globalProps.spHttpClient.post(`${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items(${itemId})`,
+  return globalProps.spHttpClient.post(
+    `${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items(${itemId})`,
     SPHttpClient.configurations.v1,
     {
       headers: {
@@ -88,11 +87,9 @@ export function updateItem(listName, itemId, newSrsStage, nextReviewTime, global
     }
   )
   .then((response: SPHttpClientResponse) => {
-    // console.log('Item updated');
     return `${ itemId } has been created!`;
   },
   (error: any) => {
-    // console.log('Error updating item', error);
     return "There was an error updating the item, see console for details.";
   });
 }

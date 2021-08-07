@@ -4,7 +4,7 @@ export interface IListItems {
     Readings: string;
     Meanings: string;
     SRSStage: number;
-    NextReviewTime: Date;
+    Nextreviewtime: string;
     MeaningsCorrect: boolean;
     ReadingsCorrect: boolean;
     MeaningsCorrectCount: number;

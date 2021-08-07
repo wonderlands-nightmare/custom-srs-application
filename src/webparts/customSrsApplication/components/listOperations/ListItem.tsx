@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../CustomSrsApplication.module.scss';
+import styles from './ListItems.module.scss';
 import { IListItemProps } from './IListItemProps';
 
 //////////////////////////////
@@ -12,14 +12,10 @@ export default class ListItem extends React.Component<IListItemProps> {
     }
 
     public render(): React.ReactElement<IListItemProps> {
-        // console.log('listitemsprops', this.props);
-        return  <div>
-                    <span className={ styles.description }>{ this.props.item.ID }</span>
-                    <span className={ styles.description }>{ this.props.item.Item }</span>
-                    <span className={ styles.description }>{ this.props.item.Readings }</span>
-                    <span className={ styles.description }>{ this.props.item.Meanings }</span>
-                    <span className={ styles.description }>{ this.props.item.SRSStage }</span>
-                    <span className={ styles.description }>{ this.props.item.NextReviewTime }</span>
+        return  <div className={ styles.itemRow }>
+                    <span className={ styles.itemDescription }>{ this.props.item.Item }</span>
+                    <span className={ styles.readingDescription }>{ this.props.item.Readings }</span>
+                    <span className={ styles.meaningDescription }>{ this.props.item.Meanings }</span>
                 </div>;
     }
 }

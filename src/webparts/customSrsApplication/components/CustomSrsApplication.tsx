@@ -1,5 +1,6 @@
 import React from 'react';
 import jQuery from 'jquery';
+import { Log } from '@microsoft/sp-core-library';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 
@@ -79,8 +80,9 @@ const srsStages: ISrsStageArray = {
 // Dialog item names.
 const dialogItems: ICustomKeyValueArray = {
   add: 'showAddItem',
-  review: 'showReviewSession',
-  lesson: 'showLessonSession'
+  items: 'showItems',
+  lesson: 'showLessonSession',
+  review: 'showReviewSession'
 };
 
 
@@ -89,12 +91,16 @@ const dialogItems: ICustomKeyValueArray = {
 // Top level logic and layout for app functions.
 //////////////////////////////
 export default class CustomSrsApplication extends React.Component<ICustomSrsApplicationProps, ICustomSrsApplicationState> {
+  public getItemsTimer: number;
+
   public constructor(props: ICustomSrsApplicationProps, state: ICustomSrsApplicationState) {
     super(props);
 
     this.state = {
       status: "Ready",
-      items: [],
+      allItems: [],
+      lessonItems: [],
+      reviewItems: [],
       addNewItemMessage: null,
       addNewItemName: null,
       addNewItemReadings: null,
@@ -105,106 +111,120 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
   }
 
 
-  public async componentDidMount(){
-    // Wait for items to be retrieved from Items List and add to state.
-    this.setState({
-      items: await getItemList(this.props.itemsList, this.props)
-    });
+  public componentDidMount() {
+    this.updateItemsInState();
+
+    // Set timeout for the next hour from page load, then re-render at that interval.
+    const nextHour = new Date().setHours(new Date().getHours() + 1, 0, 0, 50);
+    let timeoutInterval = nextHour - new Date().getTime();
+    
+    this.getItemsTimer = setInterval(() => this.updateItemsInState(), timeoutInterval);
+    
+    console.log(`Next refresh will happen at ${ new Date(nextHour) }`);
+  }
+
+  public componentWillUnmount() {
+    clearInterval(this.getItemsTimer);
   }
 
 
   public render(): React.ReactElement<ICustomSrsApplicationProps> {
-    // Get review items.
-    let reviewItems: IListItems[] = this.state.items.filter(item => item.SRSStage != 0 && item.SRSStage != 9);
-    reviewItems = reviewItems.sort(() => Math.random() - 0.5);
-    console.log('reviewItems', reviewItems);
-    // Get lesson items.
-    let lessonItems: IListItems[] = this.state.items.filter(item => item.SRSStage == 0);
-    lessonItems = lessonItems.sort(() => Math.random() - 0.5);
-    console.log('lessonItems', lessonItems);
+    // Get list items HTML.
+    let listItems = this.state.allItems.map(
+      (item) => {
+        return <ListItem item={ item }/>;
+      }
+    );
 
-    console.log('csrsa state: ', this.state);
+    // Randomise lesson and review items.
+    const lessonItems = this.state.lessonItems.sort(() => Math.random() - 0.5);
+    const reviewItems = this.state.reviewItems.sort(() => Math.random() - 0.5);
+
+    const lessonButtonClass = lessonItems.length > 0 ? styles.lessonButton : styles.inactiveButton;
+    const reviewButtonClass = reviewItems.length > 0 ? styles.reviewButton : styles.inactiveButton;
 
     return (
       <div className={ styles.customSrsApplication }>
         <div className={ styles.container }>
-          <div className={ styles.row }>
-            <div className={ styles.column }>
-              <span className={ styles.title }>Items currently in the list!</span>
-              
-              {/* { console.log('items at render:', this.state.items) } */}
-              { this.state.items.map(
-                  (item) => {
-                    // console.log('item is:', item);
-                    return <ListItem item={ item }/>;
-                  }
-                ) 
-              }
-              
-              <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.add, true) }>
-                <span className={ styles.label }>Add an item</span>
-              </a>
-              <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.review, true) }>
-                <span className={ styles.label }>Review items</span>
-              </a>
-              <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.lesson, true) }>
-                <span className={ styles.label }>Learn items</span>
-              </a>
-            </div>
+          <div className={ `${ styles.row } ${ styles.flexRow }` }>
+            <a href="#" className={ `${ styles.button } ${ styles.itemsButton }` } onClick={ () => this.toggleDialog(dialogItems.items, true) }>
+              <span className={ `${ styles.label } ${ styles.largeLabel }` }>Show items</span>
+              <span className={ `${ styles.label } ${ styles.largeLabel }` }>{ this.state.allItems.length }</span>
+            </a>
+            <a href="#" className={ `${ styles.button } ${ reviewButtonClass }` } onClick={ () => this.toggleDialog(dialogItems.review, true) }>
+              <span className={ `${ styles.label } ${ styles.largeLabel }` }>Review items</span>
+              <span className={ `${ styles.label } ${ styles.largeLabel }` }>{ reviewItems.length }</span>
+            </a>
+            <a href="#" className={ `${ styles.button } ${ lessonButtonClass }` } onClick={ () => this.toggleDialog(dialogItems.lesson, true) }>
+              <span className={ `${ styles.label } ${ styles.largeLabel }` }>Learn items</span>
+              <span className={ `${ styles.label } ${ styles.largeLabel }` }>{ lessonItems.length }</span>
+            </a>
           </div>
 
+          { (this.state.showDialog && this.state.showDialogName == dialogItems.items ) &&
+            <div className={ `${ styles.row } ${ styles.itemsRow }` }>
+              <div className={ styles.title }>Items currently in the list!</div>
+              
+              { listItems }
+              
+              <div className={ `${ styles.buttonRow } ${ styles.flexRow }` }>
+                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.add, true) }>
+                  <span className={ styles.label }>Add an item</span>
+                </a>
+                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.items, false, true) }>
+                  <span className={ styles.label }>Close items</span>
+                </a>
+              </div>
+            </div>
+          }
+
           { (this.state.showDialog && this.state.showDialogName == dialogItems.add ) &&
-            <div className={ styles.row }>
-              { this.state.addNewItemMessage }
-              <div className={ styles.addItemWrapper }>
+            <div className={ `${ styles.row } ${ styles.itemsRow }` }>
+              <span className={ styles.title }>{ this.state.addNewItemMessage }</span>
+              
+              <div className={ styles.addItemRow }>
                 <span className={ styles.label }>Item name</span>
-                <input type="text" name="addNewItemName" onChange={ (event) => this.handleInputChange(event) }/>
+                <input type="text" name="addNewItemName" autoComplete="off" onChange={ (event) => this.handleInputChange(event) }/>
               </div>
-              <div className={ styles.addItemWrapper }>
+              <div className={ styles.addItemRow }>
                 <span className={ styles.label }>Readings</span>
-                <input type="text" name="addNewItemReadings" onChange={ (event) => this.handleInputChange(event) }/>
+                <input type="text" name="addNewItemReadings" autoComplete="off" onChange={ (event) => this.handleInputChange(event) }/>
               </div>
-              <div className={ styles.addItemWrapper }>
+              <div className={ styles.addItemRow }>
                 <span className={ styles.label }>Meanings</span>
-                <input type="text" name="addNewItemMeanings" onChange={ (event) => this.handleInputChange(event) }/>
+                <input type="text" name="addNewItemMeanings" autoComplete="off" onChange={ (event) => this.handleInputChange(event) }/>
               </div>
-              <a href="#" className={ styles.button } onClick={ () => this.addNewItem() }>
-                <span className={ styles.label }>Add</span>
-              </a>
-              <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.add, false) }>
-                <span className={ styles.label }>Close</span>
-              </a>
+              <div className={ `${ styles.buttonRow } ${ styles.flexRow }` }>
+                <a href="#" className={ styles.button } onClick={ () => this.addNewItem() }>
+                  <span className={ styles.label }>Add</span>
+                </a>
+                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.add, false, true) }>
+                  <span className={ styles.label }>Close</span>
+                </a>
+              </div>
             </div>
           }
 
           { (this.state.showDialog && this.state.showDialogName == dialogItems.review ) &&
-            (reviewItems.length > 0
-            ? (
-              <div>
+              <div className={ `${ styles.row } ${ styles.reviewRow }` }>
                 <SrsReviewSession sessionReviewItems={ reviewItems } globalProps={ this.props } srsStages={ srsStages }/>
-                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.review, false) }>
-                  <span className={ styles.label }>Close reviews</span>
-                </a>
+                <div className={ `${ styles.buttonRow } ${ styles.flexRow }` }>
+                  <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.review, false, true) }>
+                    <span className={ styles.label }>Close reviews</span>
+                  </a>
+                </div>
               </div>
-            )
-            : (
-              <div>Nothing to review!</div>
-            ))
           }
           
           { (this.state.showDialog && this.state.showDialogName == dialogItems.lesson ) &&
-            (lessonItems.length > 0
-            ? (
-              <div>
-                <SrsLessonSession sessionReviewItems={ lessonItems } globalProps={ this.props } srsStages={ srsStages }/>
-                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.lesson, false) }>
-                  <span className={ styles.label }>Close lessons</span>
-                </a>
+              <div className={ `${ styles.row } ${ styles.lessonRow }` }>
+                <SrsLessonSession sessionLessonItems={ lessonItems } globalProps={ this.props } srsStages={ srsStages }/>
+                <div className={ `${ styles.buttonRow } ${ styles.flexRow }` }>
+                  <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.lesson, false, true) }>
+                    <span className={ styles.label }>Close lessons</span>
+                  </a>
+                </div>
               </div>
-            )  
-            : (
-              <div>Nothing to learn!</div>
-            ))
           }
 
         </div>
@@ -216,12 +236,16 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
   // ANCHOR Function - toggleDialog
   // Toggle display of dialog using state change.
   //////////////////////////////
-  private toggleDialog(toggleItem, toggleValue) {
+  private toggleDialog(toggleItem, toggleValue, refresh = false) {
     this.setState({
       ...this.state,
       showDialog: toggleValue,
       showDialogName: toggleItem
     });
+
+    if (refresh) {
+      this.updateItemsInState();
+    }
   }
 
   //////////////////////////////
@@ -235,8 +259,10 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
           this.setState({
             ...this.state,
             addNewItemMessage: "Successfully added new item.",
-            items: await getItemList(this.props.itemsList, this.props)
+            allItems: await getItemList(this.props.itemsList, this.props)
           });
+
+          this.updateItemsInState();
 
           jQuery('.addItemWrapper > input').val('');
         })
@@ -254,6 +280,24 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
     this.setState({
       ...this.state,
       [event.target.name]: value
+    });
+  }
+
+  //////////////////////////////
+  // ANCHOR Function - updateItemsInState
+  // Refresh items in state.
+  //////////////////////////////
+  private async updateItemsInState() {
+    // Get all of the items for display/review/lessons.
+    const itemsFromList = await getItemList(this.props.itemsList, this.props);
+    const itemsForLesson = itemsFromList.filter(item => item.SRSStage == 0);
+    const itemsForReview = itemsFromList.filter(item => item.SRSStage > 0 && item.SRSStage < 9 && (new Date() > new Date(item.Nextreviewtime)));
+    
+    // Wait for items to be retrieved from Items List and add to state.
+    this.setState({
+      allItems: itemsFromList,
+      lessonItems: itemsForLesson,
+      reviewItems: itemsForReview
     });
   }
 }
