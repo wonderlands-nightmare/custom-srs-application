@@ -113,18 +113,6 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
   public componentDidMount() {
     this.updateItemsInState();
-
-    // Set timeout for the next hour from page load, then re-render at that interval.
-    const nextHour = new Date().setHours(new Date().getHours() + 1, 0, 0, 50);
-    let timeoutInterval = nextHour - new Date().getTime();
-    
-    this.getItemsTimer = setInterval(() => this.updateItemsInState(), timeoutInterval);
-    
-    console.log(`Next refresh will happen at ${ new Date(nextHour) }`);
-  }
-
-  public componentWillUnmount() {
-    clearInterval(this.getItemsTimer);
   }
 
 
@@ -146,6 +134,11 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
     return (
       <div className={ styles.customSrsApplication }>
         <div className={ styles.container }>
+          <div className={ `${ styles.row } ${ styles.flexRow }` }>
+            <a href="#" className={ `${ styles.button } ${ styles.refreshButton }` } onClick={ () => this.updateItemsInState() }>
+              <span className={ styles.label }>Refresh items</span>
+            </a>
+          </div>
           <div className={ `${ styles.row } ${ styles.flexRow }` }>
             <a href="#" className={ `${ styles.button } ${ styles.itemsButton }` } onClick={ () => this.toggleDialog(dialogItems.items, true) }>
               <span className={ `${ styles.label } ${ styles.largeLabel }` }>Show items</span>

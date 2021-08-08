@@ -88,6 +88,12 @@
           background: darkslategray;
         }
 
+        &.refreshButton {
+          display: block;
+          background: darkmagenta;
+          width: 100%;
+        }
+
         &.itemsButton {
           background: cadetblue;
         }
