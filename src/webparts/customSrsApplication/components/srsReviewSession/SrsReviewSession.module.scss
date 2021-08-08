@@ -46,6 +46,15 @@
           background: palevioletred;
         }
       }
+
+      .answerDescription {
+        display: block;
+        margin-top: 15px;
+
+        &.hidden {
+          display: none;
+        }
+      }
     }
   }
 }

@@ -88,6 +88,7 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
                       this.checkAnswer(event, reviewItem, itemSessionReviewType);
                     }
                   } }/>
+                  <span className={ `${ styles.answerDescription } ${ styles.hidden }` }>{ reviewItem[itemSessionReviewType] }</span>
                 </div>
               </div>
             )
@@ -144,6 +145,10 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
       }));
 
       jQuery('#answerBox').addClass(correct ? styles.correct : styles.incorrect);
+
+      if (!correct) {
+        jQuery(`.${ styles.answerDescription }`).removeClass(styles.hidden);
+      }
     }
     // If the item was answered after enter key is pressed.
     else if (this.state.reviewItemAnswered) {
@@ -162,6 +167,7 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
         });
 
         jQuery('#answerBox').val('').removeClass();
+        jQuery(`.${ styles.answerDescription }`).addClass(styles.hidden);
       }
     }
 
