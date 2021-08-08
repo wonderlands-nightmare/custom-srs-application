@@ -35,6 +35,7 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
     const itemsToReview = this.state.sessionReviewItems.length > 0;
     let reviewItem;
     let itemSessionReviewType = "";
+    let reviewTypeClass = "";
     let answerStateItem = "";
     let answerState = "";
 
@@ -65,6 +66,12 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
                       : reviewItem[answerStateItem]
                         ? 'Right!' : 'Wrong!';
 
+      reviewTypeClass = itemSessionReviewType == 'Meanings'
+                        ? styles.meanings
+                        : itemSessionReviewType == 'Readings'
+                          ? styles.readings
+                          : '';
+
     }
 
     // Display for the session.
@@ -75,7 +82,7 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
               <div className={ styles.container }>
                 <div className={ styles.row }>
                   <span className={ styles.itemDescription }>{ reviewItem.Item }</span>
-                  <span className={ styles.reviewTypeDescription }>{ itemSessionReviewType }</span>
+                  <span className={ `${ styles.reviewTypeDescription } ${ reviewTypeClass }` }>{ itemSessionReviewType }</span>
                   <input id="answerBox" type="text" name={ answerStateItem } autoComplete="off" onKeyPress={ (event) => { 
                     if (event.key == 'Enter') {
                       this.checkAnswer(event, reviewItem, itemSessionReviewType);

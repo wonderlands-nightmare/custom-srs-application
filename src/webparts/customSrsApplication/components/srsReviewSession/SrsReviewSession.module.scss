@@ -13,13 +13,25 @@
       width: 100%;
       text-align: center;
 
-      .itemDescription,
-      .reviewTypeDescription,
-      input {
+      .itemDescription {
+        @include ms-font-xxl;
         display: block;
       }
 
+      .reviewTypeDescription {
+        display: block;
+
+        &.meanings {
+          background: midnightblue;
+        }
+
+        &.readings {
+          background: darkgoldenrod;
+        }
+      }
+
       input {
+        display: block;
         width: 100%;
         height: 25px;
         margin-top: 20px;

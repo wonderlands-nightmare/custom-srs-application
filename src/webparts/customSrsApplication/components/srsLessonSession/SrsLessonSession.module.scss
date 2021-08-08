@@ -16,10 +16,14 @@
       width: 100%;
       text-align: center;
 
-      .itemDescription,
       .readingDescription,
       .meaningDescription {
         @include ms-font-l;
+        display: block;
+      }
+
+      .itemDescription {
+        @include ms-font-xxl;
         display: block;
       }
 

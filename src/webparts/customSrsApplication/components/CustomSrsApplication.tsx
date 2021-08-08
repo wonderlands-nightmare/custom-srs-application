@@ -163,11 +163,20 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
           { (this.state.showDialog && this.state.showDialogName == dialogItems.items ) &&
             <div className={ `${ styles.row } ${ styles.itemsRow }` }>
+              <div className={ `${ styles.buttonRow } ${ styles.flexRow } ${ styles.topRow }` }>
+                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.add, true) }>
+                  <span className={ styles.label }>Add an item</span>
+                </a>
+                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.items, false, true) }>
+                  <span className={ styles.label }>Close items</span>
+                </a>
+              </div>
+
               <div className={ styles.title }>Items currently in the list!</div>
               
               { listItems }
               
-              <div className={ `${ styles.buttonRow } ${ styles.flexRow }` }>
+              <div className={ `${ styles.buttonRow } ${ styles.flexRow } ${ styles.bottomRow }` }>
                 <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.add, true) }>
                   <span className={ styles.label }>Add an item</span>
                 </a>
@@ -194,7 +203,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
                 <span className={ styles.label }>Meanings</span>
                 <input type="text" name="addNewItemMeanings" autoComplete="off" onChange={ (event) => this.handleInputChange(event) }/>
               </div>
-              <div className={ `${ styles.buttonRow } ${ styles.flexRow }` }>
+              <div className={ `${ styles.buttonRow } ${ styles.flexRow } ${ styles.bottomRow }` }>
                 <a href="#" className={ styles.button } onClick={ () => this.addNewItem() }>
                   <span className={ styles.label }>Add</span>
                 </a>
@@ -208,7 +217,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
           { (this.state.showDialog && this.state.showDialogName == dialogItems.review ) &&
               <div className={ `${ styles.row } ${ styles.reviewRow }` }>
                 <SrsReviewSession sessionReviewItems={ reviewItems } globalProps={ this.props } srsStages={ srsStages }/>
-                <div className={ `${ styles.buttonRow } ${ styles.flexRow }` }>
+                <div className={ `${ styles.buttonRow } ${ styles.flexRow } ${ styles.bottomRow }` }>
                   <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.review, false, true) }>
                     <span className={ styles.label }>Close reviews</span>
                   </a>
@@ -219,7 +228,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
           { (this.state.showDialog && this.state.showDialogName == dialogItems.lesson ) &&
               <div className={ `${ styles.row } ${ styles.lessonRow }` }>
                 <SrsLessonSession sessionLessonItems={ lessonItems } globalProps={ this.props } srsStages={ srsStages }/>
-                <div className={ `${ styles.buttonRow } ${ styles.flexRow }` }>
+                <div className={ `${ styles.buttonRow } ${ styles.flexRow } ${ styles.bottomRow }` }>
                   <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.lesson, false, true) }>
                     <span className={ styles.label }>Close lessons</span>
                   </a>

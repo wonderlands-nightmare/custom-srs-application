@@ -12,12 +12,19 @@
     }
 
     .buttonRow {
-      padding-top: 20px;
       text-align: center;
 
       .button:first-child {
         margin-left: 0;
       }
+    }
+
+    .topRow {
+      padding-bottom: 20px;
+    }
+
+    .bottomRow {
+      padding-top: 20px;
     }
 
     .row {
