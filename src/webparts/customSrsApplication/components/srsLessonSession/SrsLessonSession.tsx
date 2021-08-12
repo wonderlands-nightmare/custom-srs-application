@@ -44,7 +44,7 @@ export default class SrsLessonSession extends React.Component<ISrsLessonSessionP
       <section>
           { this.state.isReview
           ? (
-            <SrsReviewSession sessionReviewItems={ lessonReviewItems } globalProps={ this.props.globalProps } srsStages={ this.props.srsStages }/>
+            <SrsReviewSession  globalProps={ this.props.globalProps }sessionItemsTotalCount={ lessonReviewItems.length } sessionReviewItems={ lessonReviewItems } srsStages={ this.props.srsStages }/>
           )
           : (
             <section className={ styles.srsLessonSession }>

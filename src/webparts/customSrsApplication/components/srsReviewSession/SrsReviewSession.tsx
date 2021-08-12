@@ -25,6 +25,7 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
         return item;
       }),
       sessionReviewType: '',
+      readingSessionReviewType: '',
       reviewItemNumber: 0,
       reviewItemAnswered: false
     };
@@ -33,17 +34,22 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
 
   public render(): React.ReactElement<ISrsReviewSessionProps> {    
     const itemsToReview = this.state.sessionReviewItems.length > 0;
-    let reviewItem;
-    let itemSessionReviewType = "";
-    let reviewTypeClass = "";
     let answerStateItem = "";
-    let answerState = "";
+    let correctSessionAnswerValues = "";
+    let itemDisplay = "";
+    let itemSessionReviewType = "";
+    let itemSessionReviewTypeMessage = "";
+    let readingSessionReviewType = "";
+    let reviewItem;
+    let reviewTypeClass = "";
 
     if (itemsToReview) {
       // Initialise variables.
       reviewItem = this.state.sessionReviewItems[this.state.reviewItemNumber];
       itemSessionReviewType = this.state.sessionReviewType;
+      readingSessionReviewType = this.state.readingSessionReviewType;
 
+      // Set session review type, random on first load but specific depending on what has been answered correctly.
       if (itemSessionReviewType == '' || !this.state.reviewItemAnswered) {
         if (!reviewItem.MeaningsCorrect && !reviewItem.ReadingsCorrect) {
           itemSessionReviewType = Math.random() < 0.5 ? 'Meanings' : 'Readings';
@@ -54,25 +60,44 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
         else if (!reviewItem.MeaningsCorrect && reviewItem.ReadingsCorrect) {
           itemSessionReviewType = 'Meanings';
         }
-        else if (reviewItem.MeaningsCorrect && reviewItem.ReadingsCorrect) {
-          itemSessionReviewType = 'Done';
-        }
       }
-      
+
+      // Sets state item string for update check.
       answerStateItem = `${ itemSessionReviewType }Correct`;
 
-      answerState = answerStateItem == 'Done'
-                      ? 'Done'
-                      : reviewItem[answerStateItem]
-                        ? 'Right!' : 'Wrong!';
+      // Set session display and check details that rely on what session review type is required.
+      if (itemSessionReviewType == 'Meanings') {
+        reviewTypeClass = styles.meanings;
+        itemDisplay = reviewItem.Item;
+        itemSessionReviewTypeMessage = 'Meaning';
+        correctSessionAnswerValues = reviewItem.Meanings;
+      }
+      else if (itemSessionReviewType == 'Readings') {
+        reviewTypeClass = styles.readings;
+        itemDisplay = reviewItem.Meanings;
+        readingSessionReviewType = (readingSessionReviewType == '' || !this.state.reviewItemAnswered)
+                                 ? reviewItem.Tags.includes('kana-only')
+                                   ? 'Hiragana'
+                                   : Math.random() < 0.5 ? 'Vocabulary' : 'Hiragana'
+                                 : readingSessionReviewType;
+        // readingSessionReviewType = reviewItem.Tags.includes('kana-only')
+        //                          ? 'Hiragana'
+        //                          : Math.random() < 0.5 ? 'Vocabulary' : 'Hiragana';
+        itemSessionReviewTypeMessage = `${ readingSessionReviewType } Reading`;
 
-      reviewTypeClass = itemSessionReviewType == 'Meanings'
-                        ? styles.meanings
-                        : itemSessionReviewType == 'Readings'
-                          ? styles.readings
-                          : '';
+        if (readingSessionReviewType == 'Vocabulary') {
+          reviewTypeClass = `${ reviewTypeClass} ${ styles.vocabulary }`;
+          correctSessionAnswerValues = reviewItem.Item;
+        }
+        else if (readingSessionReviewType == 'Hiragana') {
+          reviewTypeClass = `${ reviewTypeClass} ${ styles.hiragana }`;
+          correctSessionAnswerValues = reviewItem.Readings;
+        }
+      }
 
     }
+
+    console.log('item check', reviewItem.Item, this.state.readingSessionReviewType, readingSessionReviewType, this.state.sessionReviewType, itemSessionReviewType);
 
     // Display for the session.
     return (
@@ -81,14 +106,15 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
             ? (
               <div className={ styles.container }>
                 <div className={ styles.row }>
-                  <span className={ styles.itemDescription }>{ reviewItem.Item }</span>
-                  <span className={ `${ styles.reviewTypeDescription } ${ reviewTypeClass }` }>{ itemSessionReviewType }</span>
+                  <span className={ styles.reviewSessionCounter }>{ `${ this.state.sessionReviewItems.length }/${ this.props.sessionItemsTotalCount }` }</span>
+                  <span className={ styles.itemDescription }>{ itemDisplay }</span>
+                  <span className={ `${ styles.reviewTypeDescription } ${ reviewTypeClass }` }>{ itemSessionReviewTypeMessage }</span>
                   <input id="answerBox" type="text" name={ answerStateItem } autoComplete="off" onKeyPress={ (event) => { 
                     if (event.key == 'Enter') {
-                      this.checkAnswer(event, reviewItem, itemSessionReviewType);
+                      this.checkAnswer(event, reviewItem, itemSessionReviewType, readingSessionReviewType, correctSessionAnswerValues);
                     }
                   } }/>
-                  <span className={ `${ styles.answerDescription } ${ styles.hidden }` }>{ reviewItem[itemSessionReviewType] }</span>
+                  <span className={ `${ styles.answerDescription } ${ styles.hidden }` }>{ correctSessionAnswerValues }</span>
                 </div>
               </div>
             )
@@ -104,17 +130,17 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
   // ANCHOR Function - checkAnswer
   // Logic for checking if the review answer is correct or not, and handling updates on completion.
   //////////////////////////////
-  private checkAnswer(event, reviewItem, sessionReviewType) {
+  private checkAnswer(event, reviewItem, sessionReviewType, readingReviewType, correctAnswerValues) {
     const itemReviewCorrect = reviewItem.MeaningsCorrect && reviewItem.ReadingsCorrect;
 
     if (!this.state.reviewItemAnswered) {
-      const givenAnswerValue = event.target.value.toLocaleLowerCase();
-      const correctAnswerValue = reviewItem[sessionReviewType].toLocaleLowerCase().split(", ");
+      const correctAnswerValueList = correctAnswerValues.toLocaleLowerCase().split(", ");
       const answerType = event.target.name;
       const answerTypeCount = `${ answerType }Count`;
+      const givenAnswerValue = event.target.value.toLocaleLowerCase();
 
       // Check if answer is correct or not and handle state for answer.
-      const correct = correctAnswerValue.includes(givenAnswerValue);
+      const correct = correctAnswerValueList.includes(givenAnswerValue);
 
       // Update review item object with appropriate values.
       reviewItem[answerType] = correct;
@@ -133,6 +159,7 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
       this.setState((prevState) => ({
         ...this.state,
         reviewItemAnswered: true,
+        readingSessionReviewType: readingReviewType,
         sessionReviewType: sessionReviewType,
         sessionReviewItems: prevState.sessionReviewItems
           .map((sessionItem) => {

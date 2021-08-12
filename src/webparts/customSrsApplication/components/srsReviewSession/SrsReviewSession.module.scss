@@ -13,9 +13,16 @@
       width: 100%;
       text-align: center;
 
+      .reviewSessionCounter {
+        float: right;
+        margin-top: -10px;
+        margin-right: -10px;
+      }
+
       .itemDescription {
         @include ms-font-xxl;
         display: block;
+        margin: 10px 0;
       }
 
       .reviewTypeDescription {
@@ -27,6 +34,14 @@
 
         &.readings {
           background: darkgoldenrod;
+
+          &.hiragana {
+            border: 3px solid #b60202;
+          }
+
+          &.vocabulary {
+            border: 3px solid #770c7e;
+          }
         }
       }
 

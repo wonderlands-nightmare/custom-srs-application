@@ -209,7 +209,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
           { (this.state.showDialog && this.state.showDialogName == dialogItems.review ) &&
               <div className={ `${ styles.row } ${ styles.reviewRow }` }>
-                <SrsReviewSession sessionReviewItems={ reviewItems } globalProps={ this.props } srsStages={ srsStages }/>
+                <SrsReviewSession globalProps={ this.props } sessionItemsTotalCount={ reviewItems.length } sessionReviewItems={ reviewItems } srsStages={ srsStages }/>
                 <div className={ `${ styles.buttonRow } ${ styles.flexRow } ${ styles.bottomRow }` }>
                   <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.review, false, true) }>
                     <span className={ styles.label }>Close reviews</span>
