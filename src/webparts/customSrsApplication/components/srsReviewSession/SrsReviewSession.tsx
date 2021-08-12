@@ -94,10 +94,7 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
           correctSessionAnswerValues = reviewItem.Readings;
         }
       }
-
     }
-
-    console.log('item check', reviewItem.Item, this.state.readingSessionReviewType, readingSessionReviewType, this.state.sessionReviewType, itemSessionReviewType);
 
     // Display for the session.
     return (
