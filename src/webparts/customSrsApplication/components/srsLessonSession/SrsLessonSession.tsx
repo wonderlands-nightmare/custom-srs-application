@@ -47,7 +47,7 @@ export default class SrsLessonSession extends React.Component<ISrsLessonSessionP
                 ? (
                     <div className={ styles.container }>
                       <div className={ styles.row }>
-                        <span className={ styles.lessonSessionCounter }>{ `${ this.state.sessionLessonItems.length } left in session | ${ this.props.sessionItemsTotalCount } total` }</span>
+                        <span className={ styles.lessonSessionCounter }>{ `${ this.state.sessionLessonItems.length } items in this session | ${ this.props.sessionItemsTotalCount } total` }</span>
                         <span className={ styles.itemDescription }>{ this.state.sessionLessonItems[this.state.lessonItemNumber].Item }</span>
                         <span className={ styles.readingDescription }>{ this.state.sessionLessonItems[this.state.lessonItemNumber].Readings }</span>
                         <span className={ styles.meaningDescription }>{ this.state.sessionLessonItems[this.state.lessonItemNumber].Meanings }</span>
