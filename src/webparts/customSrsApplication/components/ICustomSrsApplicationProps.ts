@@ -5,4 +5,5 @@ export interface ICustomSrsApplicationProps {
   siteUrl: string;
   itemsList: string;
   reviewsList: string;
+  languageSelection: string;
 }

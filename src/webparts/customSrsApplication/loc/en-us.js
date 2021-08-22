@@ -1,7 +1,6 @@
 define([], function() {
   return {
-    "PropertyPaneDescription": "Description",
-    "BasicGroupName": "Group Name",
-    "DescriptionFieldLabel": "Description Field"
+    "BasicGroupName": "SRS App settings",
+    "LanguageSelectFieldLabel": "Select language to review with"
   }
 });

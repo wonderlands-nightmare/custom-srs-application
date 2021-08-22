@@ -6,7 +6,7 @@ import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 //////////////////////////////
 export function getItemList(listName, globalProps) {
   return globalProps.spHttpClient.get(
-    `${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items`,
+    `${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items?$top=100000`,
     SPHttpClient.configurations.v1,
     {
       headers: {

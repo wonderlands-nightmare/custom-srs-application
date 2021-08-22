@@ -1,7 +1,6 @@
 declare interface ICustomSrsApplicationWebPartStrings {
-  PropertyPaneDescription: string;
   BasicGroupName: string;
-  DescriptionFieldLabel: string;
+  LanguageSelectFieldLabel: string;
 }
 
 declare module 'CustomSrsApplicationWebPartStrings' {

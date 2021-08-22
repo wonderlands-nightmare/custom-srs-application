@@ -34,6 +34,8 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
 
   public render(): React.ReactElement<ISrsReviewSessionProps> {    
     const itemsToReview = this.state.sessionReviewItems.length > 0;
+    const languageSelected = this.props.globalProps.languageSelection;
+    let readingDisplay = "";
     let answerStateItem = "";
     let correctSessionAnswerValues = "";
     let itemDisplay = "";
@@ -42,6 +44,8 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
     let readingSessionReviewType = "";
     let reviewItem;
     let reviewTypeClass = "";
+    
+    
 
     if (itemsToReview) {
       // Initialise variables.
@@ -71,28 +75,37 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
         itemDisplay = reviewItem.Item;
         itemSessionReviewTypeMessage = 'Meaning';
         correctSessionAnswerValues = reviewItem.Meanings;
+        readingSessionReviewType = '';
       }
       else if (itemSessionReviewType == 'Readings') {
         reviewTypeClass = styles.readings;
         itemDisplay = reviewItem.Meanings;
-        readingSessionReviewType = (readingSessionReviewType == '' || !this.state.reviewItemAnswered)
-                                 ? reviewItem.Tags.includes('kana-only')
-                                   ? 'Hiragana'
-                                   : Math.random() < 0.5 ? 'Vocabulary' : 'Hiragana'
-                                 : readingSessionReviewType;
-        // readingSessionReviewType = reviewItem.Tags.includes('kana-only')
-        //                          ? 'Hiragana'
-        //                          : Math.random() < 0.5 ? 'Vocabulary' : 'Hiragana';
-        itemSessionReviewTypeMessage = `${ readingSessionReviewType } Reading`;
 
-        if (readingSessionReviewType == 'Vocabulary') {
-          reviewTypeClass = `${ reviewTypeClass} ${ styles.vocabulary }`;
+        // Since we're coving Thai and Japanese, the reading selection and display will be diffrent between the two.
+        if (languageSelected == 'japanese') {
+          readingSessionReviewType = (readingSessionReviewType == '' || !this.state.reviewItemAnswered)
+                                  ? reviewItem.Tags.includes('kana-only')
+                                    ? 'Hiragana'
+                                    : Math.random() < 0.5 ? 'Vocabulary' : 'Hiragana'
+                                  : readingSessionReviewType;
+          itemSessionReviewTypeMessage = `${ readingSessionReviewType } Reading`;
+
+          if (readingSessionReviewType == 'Vocabulary') {
+            reviewTypeClass = `${ reviewTypeClass} ${ styles.vocabulary }`;
+            correctSessionAnswerValues = reviewItem.Item;
+          }
+          else if (readingSessionReviewType == 'Hiragana') {
+            reviewTypeClass = `${ reviewTypeClass} ${ styles.hiragana }`;
+            correctSessionAnswerValues = reviewItem.Readings;
+          }
+        }
+        else {
+          // No need to specify that we're using Thai here with else if.
+          itemSessionReviewTypeMessage = `Thai Reading`;
           correctSessionAnswerValues = reviewItem.Item;
+          readingDisplay = reviewItem.Readings;
         }
-        else if (readingSessionReviewType == 'Hiragana') {
-          reviewTypeClass = `${ reviewTypeClass} ${ styles.hiragana }`;
-          correctSessionAnswerValues = reviewItem.Readings;
-        }
+
       }
     }
 
@@ -103,15 +116,20 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
             ? (
               <div className={ styles.container }>
                 <div className={ styles.row }>
-                  <span className={ styles.reviewSessionCounter }>{ `${ this.state.sessionReviewItems.length }/${ this.props.sessionItemsTotalCount }` }</span>
+                  <span className={ styles.reviewSessionCounter }>{ `${ this.state.sessionReviewItems.length } left | ${ this.props.sessionItemsTotalCount } total` }</span>
                   <span className={ styles.itemDescription }>{ itemDisplay }</span>
+                  { readingDisplay != '' &&
+                    <span className={ styles.itemDescription }>{ readingDisplay }</span>
+                  }
                   <span className={ `${ styles.reviewTypeDescription } ${ reviewTypeClass }` }>{ itemSessionReviewTypeMessage }</span>
                   <input id="answerBox" type="text" name={ answerStateItem } autoComplete="off" onKeyPress={ (event) => { 
                     if (event.key == 'Enter') {
                       this.checkAnswer(event, reviewItem, itemSessionReviewType, readingSessionReviewType, correctSessionAnswerValues);
                     }
                   } }/>
-                  <span className={ `${ styles.answerDescription } ${ styles.hidden }` }>{ correctSessionAnswerValues }</span>
+                  <span className={ `${ styles.answerDescription } ${ styles.hidden }` }>{ 
+                    `${ correctSessionAnswerValues }${ readingSessionReviewType == 'Vocabulary' ? ' (' + reviewItem.Readings + ')' : '' }`
+                  }</span>
                 </div>
               </div>
             )
