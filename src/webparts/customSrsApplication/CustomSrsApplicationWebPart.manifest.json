@@ -21,7 +21,8 @@
     "description": { "default": "Custom SRS Application description" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "languageSelection": "japanese"
+      "languageSelection": "japanese",
+      "lessonLimit": 10
     }
   }]
 }

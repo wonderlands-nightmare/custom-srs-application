@@ -6,4 +6,5 @@ export interface ICustomSrsApplicationProps {
   itemsList: string;
   reviewsList: string;
   languageSelection: string;
+  lessonLimit: number;
 }

@@ -3,7 +3,8 @@ import ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
-  PropertyPaneDropdown
+  PropertyPaneDropdown,
+  PropertyPaneTextField
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
@@ -13,10 +14,10 @@ import { ICustomSrsApplicationProps } from './components/ICustomSrsApplicationPr
 
 export interface ICustomSrsApplicationWebPartProps {
   languageSelection: string;
+  lessonLimit: number;
 }
 
 export default class CustomSrsApplicationWebPart extends BaseClientSideWebPart<ICustomSrsApplicationWebPartProps> {
-
   public render(): void {
     const element: React.ReactElement<ICustomSrsApplicationProps> = React.createElement(
       CustomSrsApplication,
@@ -25,7 +26,8 @@ export default class CustomSrsApplicationWebPart extends BaseClientSideWebPart<I
         siteUrl: this.context.pageContext.web.absoluteUrl,
         itemsList: 'SRS Items',
         reviewsList: 'SRS Reviews',
-        languageSelection: this.properties.languageSelection
+        languageSelection: this.properties.languageSelection,
+        lessonLimit: this.properties.lessonLimit
       }
     );
 
@@ -50,6 +52,10 @@ export default class CustomSrsApplicationWebPart extends BaseClientSideWebPart<I
                     { key: 'japanese', text: 'Japanese' },
                     { key: 'thai', text: 'Thai' }
                   ]
+                }),
+                PropertyPaneTextField('lessonLimit', {
+                  label: strings.LessonLimitFieldLabel,
+                  onGetErrorMessage: this.validateNumberTextField.bind(this)
                 })
               ]
             }
@@ -57,5 +63,15 @@ export default class CustomSrsApplicationWebPart extends BaseClientSideWebPart<I
         }
       ]
     };
+  }
+
+  private validateNumberTextField(value: string): string {
+    let numberFromString: number = parseInt(escape(value));
+    
+    if (isNaN(numberFromString)) {
+      return 'This is not a number. Please check for spaces or characters and input only numbers.';
+    }
+
+    return '';
   }
 }

@@ -10,11 +10,6 @@ import { ISrsLessonSessionState } from './ISrsLessonSessionState';
 
 import SrsReviewSession from '../srsReviewSession/SrsReviewSession';
 
-//////////////////////////////
-// ANCHOR Variables
-//////////////////////////////
-const lessonLimit = 10;
-
 
 //////////////////////////////
 // ANCHOR Class - SrsSession
@@ -25,7 +20,7 @@ export default class SrsLessonSession extends React.Component<ISrsLessonSessionP
     super(props);
 
     this.state = {
-      sessionLessonItems: this.props.sessionLessonItems.slice(0, lessonLimit),
+      sessionLessonItems: this.props.sessionLessonItems.slice(0, this.props.globalProps.lessonLimit),
       lessonItemNumber: 0,
       lessonItemCount: 1,
       isReview: false
@@ -37,7 +32,7 @@ export default class SrsLessonSession extends React.Component<ISrsLessonSessionP
     // Initialise variables.
     const lessonReviewItems = this.state.sessionLessonItems;
     const itemsToLearn = this.state.sessionLessonItems.length > 0;
-    const nextIsReview = (this.state.lessonItemCount == lessonLimit) || (this.state.lessonItemCount == this.state.sessionLessonItems.length);
+    const nextIsReview = (this.state.lessonItemCount == this.props.globalProps.lessonLimit) || (this.state.lessonItemCount == this.state.sessionLessonItems.length);
 
     // Display for the session.
     return (
