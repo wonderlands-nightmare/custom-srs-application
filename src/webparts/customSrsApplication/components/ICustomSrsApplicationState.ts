@@ -11,4 +11,6 @@ export interface ICustomSrsApplicationState {
   addNewItemMeanings: string;
   showDialog: boolean;
   showDialogName: string;
+  showItemsPane: boolean;
+  showItemsPaneName: string;
 }

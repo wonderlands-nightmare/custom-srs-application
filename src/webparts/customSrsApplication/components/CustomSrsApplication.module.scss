@@ -35,6 +35,18 @@
 
       &.itemsRow {
         border-top: 14px ridge $ms-color-themePrimary;
+
+        .showItemsRow {
+          padding: 5px 0;
+
+          .title {
+            border: 2px solid grey;
+          }
+
+          .hidden {
+            display: none;
+          }
+        }
       }
 
       &.lessonRow {

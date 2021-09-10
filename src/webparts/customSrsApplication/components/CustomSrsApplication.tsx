@@ -79,10 +79,22 @@ const srsStages: ISrsStageArray = {
 
 // Dialog item names.
 const dialogItems: ICustomKeyValueArray = {
+  name: 'showDialog',
   add: 'showAddItem',
   items: 'showItems',
   lesson: 'showLessonSession',
   review: 'showReviewSession'
+};
+
+// List item pane names.
+const itemPanes: ICustomKeyValueArray = {
+  name: 'showItemsPane',
+  unlearned: 'showUnlearnedItems',
+  apprentice: 'showApprenticeItems',
+  guru: 'showGuruItems',
+  master: 'showMasterItems',
+  enlightened: 'showEnlightenedItems',
+  burned: 'showBurnedItems'
 };
 
 
@@ -106,7 +118,9 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
       addNewItemReadings: null,
       addNewItemMeanings: null,
       showDialog: false,
-      showDialogName: ''
+      showDialogName: '',
+      showItemsPane: false,
+      showItemsPaneName: ''
     };
   }
 
@@ -117,16 +131,41 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
 
   public render(): React.ReactElement<ICustomSrsApplicationProps> {
-    // Get list items HTML.
-    let listItems = this.state.allItems.map(
-      (item) => {
-        return <ListItem item={ item }/>;
-      }
-    );
-
     // Randomise lesson and review items.
     const lessonItems = this.state.lessonItems.sort(() => Math.random() - 0.5);
     const reviewItems = this.state.reviewItems.sort(() => Math.random() - 0.5);
+
+    // Get list items HTML.
+    const unlearnedItems = this.state.allItems.map(
+      (item) => {
+        if (item.SRSStage == 0) { return <ListItem item={ item }/>; }
+      }
+    );
+    const apprenticeItems = this.state.allItems.map(
+      (item) => {
+        if (item.SRSStage >= 1 && item.SRSStage <= 4) { return <ListItem item={ item }/>; }
+      }
+    );
+    const guruItems = this.state.allItems.map(
+      (item) => {
+        if (item.SRSStage == 5 || item.SRSStage == 6) { return <ListItem item={ item }/>; }
+      }
+    );
+    const masterItems = this.state.allItems.map(
+      (item) => {
+        if (item.SRSStage == 7) { return <ListItem item={ item }/>; }
+      }
+    );
+    const enlightenedItems = this.state.allItems.map(
+      (item) => {
+        if (item.SRSStage == 8) { return <ListItem item={ item }/>; }
+      }
+    );
+    const burnedItems = this.state.allItems.map(
+      (item) => {
+        if (item.SRSStage == 9) { return <ListItem item={ item }/>; }
+      }
+    );
 
     const lessonButtonClass = lessonItems.length > 0 ? styles.lessonButton : styles.inactiveButton;
     const reviewButtonClass = reviewItems.length > 0 ? styles.reviewButton : styles.inactiveButton;
@@ -134,52 +173,105 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
     return (
       <div className={ styles.customSrsApplication }>
         <div className={ styles.container }>
+          {/* NOTE Main buttons */}
           <div className={ `${ styles.row } ${ styles.flexRow }` }>
             <a href="#" className={ `${ styles.button } ${ styles.refreshButton }` } onClick={ () => this.updateItemsInState() }>
               <span className={ styles.label }>Refresh items</span>
             </a>
           </div>
           <div className={ `${ styles.row } ${ styles.flexRow }` }>
-            <a href="#" className={ `${ styles.button } ${ styles.itemsButton }` } onClick={ () => this.toggleDialog(dialogItems.items, true) }>
+            <a href="#" className={ `${ styles.button } ${ styles.itemsButton }` } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.items, true) }>
               <span className={ `${ styles.label } ${ styles.largeLabel }` }>Show items</span>
               <span className={ `${ styles.label } ${ styles.largeLabel }` }>{ this.state.allItems.length }</span>
             </a>
-            <a href="#" className={ `${ styles.button } ${ reviewButtonClass }` } onClick={ () => this.toggleDialog(dialogItems.review, true) }>
+            <a href="#" className={ `${ styles.button } ${ reviewButtonClass }` } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.review, true) }>
               <span className={ `${ styles.label } ${ styles.largeLabel }` }>Review items</span>
               <span className={ `${ styles.label } ${ styles.largeLabel }` }>{ reviewItems.length }</span>
             </a>
-            <a href="#" className={ `${ styles.button } ${ lessonButtonClass }` } onClick={ () => this.toggleDialog(dialogItems.lesson, true) }>
+            <a href="#" className={ `${ styles.button } ${ lessonButtonClass }` } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.lesson, true) }>
               <span className={ `${ styles.label } ${ styles.largeLabel }` }>Learn items</span>
               <span className={ `${ styles.label } ${ styles.largeLabel }` }>{ lessonItems.length }</span>
             </a>
           </div>
 
+          {/* NOTE Show Items */}
           { (this.state.showDialog && this.state.showDialogName == dialogItems.items ) &&
             <div className={ `${ styles.row } ${ styles.itemsRow }` }>
               <div className={ `${ styles.buttonRow } ${ styles.flexRow } ${ styles.topRow }` }>
-                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.add, true) }>
+                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.add, true) }>
                   <span className={ styles.label }>Add an item</span>
                 </a>
-                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.items, false, true) }>
+                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.items, false, true) }>
                   <span className={ styles.label }>Close items</span>
                 </a>
               </div>
 
-              <div className={ styles.title }>Items currently in the list!</div>
-              
-              { listItems }
-              
+              <div className={ styles.showItemsRow }>
+                <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.unlearned, true) }>
+                  <span>Unlearned Items</span>
+                </a>
+                { (this.state.showItemsPane && this.state.showItemsPaneName == itemPanes.unlearned ) && 
+                  unlearnedItems
+                }
+              </div>
+
+              <div className={ styles.showItemsRow }>
+                <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.apprentice, true) }>
+                  <span>Apprentice Items</span>
+                </a>
+                { (this.state.showItemsPane && this.state.showItemsPaneName == itemPanes.apprentice ) &&
+                  apprenticeItems
+                }
+              </div>
+
+              <div className={ styles.showItemsRow }>
+                <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.guru, true) }>
+                  <span>Guru Items</span>
+                </a>
+                { (this.state.showItemsPane && this.state.showItemsPaneName == itemPanes.guru ) &&
+                  guruItems
+                }
+              </div>
+
+              <div className={ styles.showItemsRow }>
+                <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.master, true) }>
+                  <span>Master Items</span>
+                </a>
+                { (this.state.showItemsPane && this.state.showItemsPaneName == itemPanes.master ) &&
+                  masterItems
+                }
+              </div>
+
+              <div className={ styles.showItemsRow }>
+                <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.enlightened, true) }>
+                  <span>Enlightened Items</span>
+                </a>
+                { (this.state.showItemsPane && this.state.showItemsPaneName == itemPanes.enlightened ) &&
+                  enlightenedItems
+                }
+              </div>
+
+              <div className={ styles.showItemsRow }>
+                <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.burned, true) }>
+                  <span>Burned Items</span>
+                </a>
+                { (this.state.showItemsPane && this.state.showItemsPaneName == itemPanes.burned ) &&
+                  burnedItems
+                }
+              </div>
+
               <div className={ `${ styles.buttonRow } ${ styles.flexRow } ${ styles.bottomRow }` }>
-                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.add, true) }>
+                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.add, true) }>
                   <span className={ styles.label }>Add an item</span>
                 </a>
-                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.items, false, true) }>
+                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.items, false, true) }>
                   <span className={ styles.label }>Close items</span>
                 </a>
               </div>
             </div>
           }
 
+          {/* NOTE Add Items */}
           { (this.state.showDialog && this.state.showDialogName == dialogItems.add ) &&
             <div className={ `${ styles.row } ${ styles.itemsRow }` }>
               <span className={ styles.title }>{ this.state.addNewItemMessage }</span>
@@ -200,29 +292,31 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
                 <a href="#" className={ styles.button } onClick={ () => this.addNewItem() }>
                   <span className={ styles.label }>Add</span>
                 </a>
-                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.add, false, true) }>
+                <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.add, false, true) }>
                   <span className={ styles.label }>Close</span>
                 </a>
               </div>
             </div>
           }
 
+          {/* NOTE Review Items */}
           { (this.state.showDialog && this.state.showDialogName == dialogItems.review ) &&
               <div className={ `${ styles.row } ${ styles.reviewRow }` }>
                 <SrsReviewSession globalProps={ this.props } sessionItemsTotalCount={ reviewItems.length } sessionReviewItems={ reviewItems } srsStages={ srsStages }/>
                 <div className={ `${ styles.buttonRow } ${ styles.flexRow } ${ styles.bottomRow }` }>
-                  <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.review, false, true) }>
+                  <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.review, false, true) }>
                     <span className={ styles.label }>Close reviews</span>
                   </a>
                 </div>
               </div>
           }
           
+          {/* NOTE Lesson Items */}
           { (this.state.showDialog && this.state.showDialogName == dialogItems.lesson ) &&
               <div className={ `${ styles.row } ${ styles.lessonRow }` }>
                 <SrsLessonSession globalProps={ this.props } sessionItemsTotalCount={ lessonItems.length } sessionLessonItems={ lessonItems } srsStages={ srsStages }/>
                 <div className={ `${ styles.buttonRow } ${ styles.flexRow } ${ styles.bottomRow }` }>
-                  <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.lesson, false, true) }>
+                  <a href="#" className={ styles.button } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.lesson, false, true) }>
                     <span className={ styles.label }>Close lessons</span>
                   </a>
                 </div>
@@ -234,20 +328,24 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
     );
   }
 
+
   //////////////////////////////
   // ANCHOR Function - toggleDialog
   // Toggle display of dialog using state change.
   //////////////////////////////
-  private toggleDialog(toggleItem, toggleValue, refresh = false) {
+  private toggleDialog(stateItem, toggleItem, toggleValue, refresh = false) {
+    const stateItemName = `${ stateItem }Name`;
+    
     this.setState({
       ...this.state,
-      showDialog: toggleValue,
-      showDialogName: toggleItem
+      [stateItem]: toggleValue,
+      [stateItemName]: toggleItem
     });
 
     if (refresh) {
       this.updateItemsInState();
     }
+    console.log('toggleDialog', stateItem, this.state[stateItem], this.state[stateItemName]);
   }
 
   //////////////////////////////
