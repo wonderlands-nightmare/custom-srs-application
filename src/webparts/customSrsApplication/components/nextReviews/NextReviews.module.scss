@@ -1,0 +1,46 @@
+@import '~office-ui-fabric-react/dist/sass/References.scss';
+
+.nextReviews {
+  .container {
+    @include ms-fontColor-white;
+    margin: 0px auto;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
+    background-color: darkblue;
+    padding: 20px;
+
+    .row {
+      width: 100%;
+      text-align: center;
+
+      .mainHeader {
+        @include ms-font-xxl;
+        display: block;
+        margin-bottom: 15px;
+      }
+
+      .itemsRow {
+        .itemBox {
+          display: inline-block;
+          padding: 15px 5px 10px;
+          margin: 6px;
+          width: calc(1/16 * 100%);
+          border: 1px solid grey;
+
+          .itemTime {
+            @include ms-font-l;
+            display: block;
+            margin-top: -27px;
+            background: darkblue;
+            border-bottom: 1px groove white;
+          }
+
+          .itemCount {
+            @include ms-font-m;
+            display: block;
+            margin-top: 5px;
+          }
+        }
+      }
+    }
+  }
+}
