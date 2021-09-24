@@ -1,5 +1,7 @@
 # custom-srs-application
 
+gulp clean; gulp bundle --ship; gulp package-solution
+
 ## Summary
 
 Short summary on functionality and used technologies.
