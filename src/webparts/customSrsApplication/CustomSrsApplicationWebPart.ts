@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import { Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
+  IPropertyPaneGroup,
   PropertyPaneDropdown,
-  PropertyPaneTextField
+  PropertyPaneTextField,
+  PropertyPaneToggle
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
@@ -15,6 +16,8 @@ import { ICustomSrsApplicationProps } from './components/ICustomSrsApplicationPr
 export interface ICustomSrsApplicationWebPartProps {
   languageSelection: string;
   lessonLimit: number;
+  useWanikani: boolean;
+  wanikaniApiKey: string;
 }
 
 export default class CustomSrsApplicationWebPart extends BaseClientSideWebPart<ICustomSrsApplicationWebPartProps> {
@@ -22,12 +25,19 @@ export default class CustomSrsApplicationWebPart extends BaseClientSideWebPart<I
     const element: React.ReactElement<ICustomSrsApplicationProps> = React.createElement(
       CustomSrsApplication,
       {
-        spHttpClient: this.context.spHttpClient,
+        httpDetails: {
+          spHttpClient: this.context.spHttpClient,
+          httpClient: this.context.httpClient
+        },
         siteUrl: this.context.pageContext.web.absoluteUrl,
         itemsList: 'SRS Items',
         reviewsList: 'SRS Reviews',
         languageSelection: this.properties.languageSelection,
-        lessonLimit: this.properties.lessonLimit
+        lessonLimit: this.properties.lessonLimit,
+        wanikaniDetails: {
+          usingWanikani: this.properties.useWanikani,
+          wanikaniApiKey: this.properties.wanikaniApiKey
+        }
       }
     );
 
@@ -39,25 +49,42 @@ export default class CustomSrsApplicationWebPart extends BaseClientSideWebPart<I
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
+    const conditionalGroupFields: IPropertyPaneGroup["groupFields"] = [
+      PropertyPaneDropdown('languageSelection', {
+        label: strings.LanguageSelectFieldLabel,
+        options: [
+          { key: 'japanese', text: 'Japanese' },
+          { key: 'thai', text: 'Thai' }
+        ]
+      }),
+      PropertyPaneTextField('lessonLimit', {
+        label: strings.LessonLimitFieldLabel,
+        onGetErrorMessage: this.validateNumberTextField.bind(this)
+      }),
+      PropertyPaneToggle("useWanikani", {
+        key: 'useWanikani',
+        label: '',
+        checked: false,
+        onText: "Using WaniKani",
+        offText: "Not Using WaniKani"
+      }),
+    ];
+
+    // show Field2, only if Field1 is true
+    if (this.properties.useWanikani) {
+      conditionalGroupFields.push(
+        PropertyPaneTextField('wanikaniApiKey', {
+          label: strings.WanikaniApiKeyLabel
+        }),
+      );
+    }
     return {
       pages: [
         {
           groups: [
             {
               groupName: strings.BasicGroupName,
-              groupFields: [
-                PropertyPaneDropdown('languageSelection', {
-                  label: strings.LanguageSelectFieldLabel,
-                  options: [
-                    { key: 'japanese', text: 'Japanese' },
-                    { key: 'thai', text: 'Thai' }
-                  ]
-                }),
-                PropertyPaneTextField('lessonLimit', {
-                  label: strings.LessonLimitFieldLabel,
-                  onGetErrorMessage: this.validateNumberTextField.bind(this)
-                })
-              ]
+              groupFields: conditionalGroupFields
             }
           ]
         }

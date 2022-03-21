@@ -5,7 +5,7 @@ export interface ICustomSrsApplicationState {
   allItems: IListItems[];
   lessonItems: IListItems[];
   reviewItems: IListItems[];
-  nextReviewsItems: IListItems[];
+  validItems: IListItems[];
   addNewItemMessage: string;
   addNewItemName: string;
   addNewItemReadings: string;

@@ -1,13 +1,48 @@
-import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
+import { HttpClient, HttpClientResponse } from '@microsoft/sp-http';
+
+
+export function getWanikaniData(globalProps, apiEndpoint, apiFilter = "") {
+  const apiEndPath = apiFilter == "" ? apiEndpoint : `${ apiEndpoint }?${ apiFilter }`;
+
+  return globalProps.httpDetails.httpClient.get(
+    `https://api.wanikani.com/v2/${ apiEndPath }`,
+    HttpClient.configurations.v1,
+    {
+      headers: {
+        'Authorization': `Bearer ${ globalProps.wanikaniDetails.wanikaniApiKey }`,
+      }
+    }
+  )
+  .then((response: HttpClientResponse) => {
+    return response.json();
+  })
+  .then((responseBody) => {
+    console.log(`http response body for ${ apiEndpoint }`, responseBody);
+    return responseBody;
+  });
+}
+
+
+export async function testFunction(globalProps) {
+  const itemsData = {
+    subjects: await getWanikaniData(globalProps, 'subjects'),
+    assignments: await getWanikaniData(globalProps, 'assignments', "subject_types=vocabulary"),
+    reviewStatistics: await getWanikaniData(globalProps, 'review_statistics', "subject_type=vocabulary"),
+    studyMaterials: await getWanikaniData(globalProps, 'study_materials', "subject_type=vocabulary")
+  };
+
+  console.log('itemsData', itemsData);
+}
+
 
 //////////////////////////////
 // ANCHOR Function - getItemList
 // Gets the items from the provided list name using API.
 //////////////////////////////
 export function getItemList(listName, globalProps) {
-  return globalProps.httpDetails.spHttpClient.get(
+  return globalProps.httpDetails.httpClient.get(
     `${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items?$top=100000`,
-    SPHttpClient.configurations.v1,
+    HttpClient.configurations.v1,
     {
       headers: {
         'Accept': 'application/json;odata=nometadata',
@@ -15,7 +50,7 @@ export function getItemList(listName, globalProps) {
       }
     }
   )
-  .then((response: SPHttpClientResponse) => {
+  .then((response: HttpClientResponse) => {
     return response.json();
   })
   .then((returnedItems) => {
@@ -36,9 +71,9 @@ export function createItem(globalProps, state) {
     "Meanings": state.addNewItemMeanings,
   });
   
-  return globalProps.httpDetails.spHttpClient.post(
+  return globalProps.httpDetails.httpClient.post(
     `${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items`,
-    SPHttpClient.configurations.v1,
+    HttpClient.configurations.v1,
     {
       headers: {
         'Accept': 'application/json;odata=nometadata',
@@ -48,7 +83,7 @@ export function createItem(globalProps, state) {
       body: body
     }
   )
-  .then((response: SPHttpClientResponse) => {
+  .then((response: HttpClientResponse) => {
     return response.json();
   })
   .then((createdItem) => {
@@ -72,9 +107,9 @@ export function updateItem(listName, itemToUpdate, globalProps) {
     "Nextreviewtime": itemToUpdate.Nextreviewtime
   });
   
-  return globalProps.httpDetails.spHttpClient.post(
+  return globalProps.httpDetails.httpClient.post(
     `${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items(${itemId})`,
-    SPHttpClient.configurations.v1,
+    HttpClient.configurations.v1,
     {
       headers: {
         'Accept': 'application/json;odata=nometadata',
@@ -86,7 +121,7 @@ export function updateItem(listName, itemToUpdate, globalProps) {
       body: body
     }
   )
-  .then((response: SPHttpClientResponse) => {
+  .then((response: HttpClientResponse) => {
     return `${ itemId } has been created!`;
   },
   (error: any) => {

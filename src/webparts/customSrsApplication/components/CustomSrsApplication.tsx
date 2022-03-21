@@ -1,12 +1,8 @@
 import React from 'react';
 import jQuery from 'jquery';
-import { Log } from '@microsoft/sp-core-library';
-import { escape } from '@microsoft/sp-lodash-subset';
-import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 
 import styles from './CustomSrsApplication.module.scss';
 
-import { IListItems } from './listOperations/IListItems';
 import { getItemList, createItem } from './listOperations/ListOperations';
 import ListItem from './listOperations/ListItem';
 
@@ -15,6 +11,8 @@ import { ICustomSrsApplicationState } from './ICustomSrsApplicationState';
 import SrsReviewSession from './srsReviewSession/SrsReviewSession';
 import SrsLessonSession from './srsLessonSession/SrsLessonSession';
 import NextReviews from './nextReviews/NextReviews';
+
+import { testFunction } from './wanikaniIntegration/WanikaniIntegration';
 
 //////////////////////////////
 // ANCHOR Interfaces
@@ -95,7 +93,8 @@ const itemPanes: ICustomKeyValueArray = {
   guru: 'showGuruItems',
   master: 'showMasterItems',
   enlightened: 'showEnlightenedItems',
-  burned: 'showBurnedItems'
+  burned: 'showBurnedItems',
+  wanikani: 'showWanikaniItems'
 };
 
 
@@ -114,7 +113,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
       allItems: [],
       lessonItems: [],
       reviewItems: [],
-      nextReviewsItems: [],
+      validItems: [],
       addNewItemMessage: null,
       addNewItemName: null,
       addNewItemReadings: null,
@@ -133,41 +132,28 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
 
   public render(): React.ReactElement<ICustomSrsApplicationProps> {
+    // TODO TESTING
+    // testFunction(this.props);
+
     // Randomise lesson and review items.
     const lessonItems = this.state.lessonItems.sort(() => Math.random() - 0.5);
     const reviewItems = this.state.reviewItems.sort(() => Math.random() - 0.5);
 
     // Get list items HTML.
-    const unlearnedItems = this.state.allItems.map(
-      (item) => {
-        if (item.SRSStage == 0) { return <ListItem item={ item }/>; }
-      }
-    );
-    const apprenticeItems = this.state.allItems.map(
-      (item) => {
-        if (item.SRSStage >= 1 && item.SRSStage <= 4) { return <ListItem item={ item }/>; }
-      }
-    );
-    const guruItems = this.state.allItems.map(
-      (item) => {
-        if (item.SRSStage == 5 || item.SRSStage == 6) { return <ListItem item={ item }/>; }
-      }
-    );
-    const masterItems = this.state.allItems.map(
-      (item) => {
-        if (item.SRSStage == 7) { return <ListItem item={ item }/>; }
-      }
-    );
-    const enlightenedItems = this.state.allItems.map(
-      (item) => {
-        if (item.SRSStage == 8) { return <ListItem item={ item }/>; }
-      }
-    );
-    const burnedItems = this.state.allItems.map(
-      (item) => {
-        if (item.SRSStage == 9) { return <ListItem item={ item }/>; }
-      }
-    );
+    const unlearnedItems = this.state.allItems.filter(item => item.SRSStage == 0)
+      .map(item => <ListItem item={ item }/> );
+    const apprenticeItems = this.state.allItems.filter(item => item.SRSStage >= 1 && item.SRSStage <= 4)
+      .map(item => <ListItem item={ item }/> );
+    const guruItems = this.state.allItems.filter(item => item.SRSStage == 5 || item.SRSStage == 6)
+      .map(item => <ListItem item={ item }/> );
+    const masterItems = this.state.allItems.filter(item => item.SRSStage == 7)
+      .map(item => <ListItem item={ item }/> );
+    const enlightenedItems = this.state.allItems.filter(item => item.SRSStage == 8)
+      .map(item => <ListItem item={ item }/> );
+    const burnedItems = this.state.allItems.filter(item => item.SRSStage == 9)
+      .map(item => <ListItem item={ item }/> );
+    const wanikaniItems = this.state.allItems.filter(item => item.SRSStage == 10)
+      .map(item => <ListItem item={ item }/> );
 
     const lessonButtonClass = lessonItems.length > 0 ? styles.lessonButton : styles.inactiveButton;
     const reviewButtonClass = reviewItems.length > 0 ? styles.reviewButton : styles.inactiveButton;
@@ -175,7 +161,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
     return (
       <div className={ styles.customSrsApplication }>
         {/* NOTE Next reviews */}
-        <NextReviews nextReviewsItems={ this.state.nextReviewsItems } globalProps={ this.props }/>
+        <NextReviews nextReviewsItems={ this.state.validItems } globalProps={ this.props }/>
         
         <div className={ styles.container }>
           {/* NOTE Main buttons */}
@@ -187,7 +173,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
           <div className={ `${ styles.row } ${ styles.flexRow }` }>
             <a href="#" className={ `${ styles.button } ${ styles.itemsButton }` } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.items, true) }>
               <span className={ `${ styles.label } ${ styles.largeLabel }` }>Show items</span>
-              <span className={ `${ styles.label } ${ styles.largeLabel }` }>{ this.state.allItems.length }</span>
+              <span className={ `${ styles.label } ${ styles.largeLabel }` }>{ this.state.validItems.length }</span>
             </a>
             <a href="#" className={ `${ styles.button } ${ reviewButtonClass }` } onClick={ () => this.toggleDialog(dialogItems.name, dialogItems.review, true) }>
               <span className={ `${ styles.label } ${ styles.largeLabel }` }>Review items</span>
@@ -213,7 +199,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
               <div className={ styles.showItemsRow }>
                 <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.unlearned, true) }>
-                  <span>Unlearned Items</span>
+                  <span>Unlearned Items ({ unlearnedItems.length })</span>
                 </a>
                 <a href="#" className={ `${ styles.button } ${ styles.titleClose }` } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.unlearned, false) }>
                   <span className={ styles.label }>Close</span>
@@ -225,7 +211,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
               <div className={ styles.showItemsRow }>
                 <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.apprentice, true) }>
-                  <span>Apprentice Items</span>
+                  <span>Apprentice Items ({ apprenticeItems.length })</span>
                 </a>
                 <a href="#" className={ `${ styles.button } ${ styles.titleClose }` } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.apprentice, false) }>
                   <span className={ styles.label }>Close</span>
@@ -237,7 +223,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
               <div className={ styles.showItemsRow }>
                 <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.guru, true) }>
-                  <span>Guru Items</span>
+                  <span>Guru Items ({ guruItems.length })</span>
                 </a>
                 <a href="#" className={ `${ styles.button } ${ styles.titleClose }` } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.guru, false) }>
                   <span className={ styles.label }>Close</span>
@@ -249,7 +235,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
               <div className={ styles.showItemsRow }>
                 <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.master, true) }>
-                  <span>Master Items</span>
+                  <span>Master Items ({ masterItems.length })</span>
                 </a>
                 <a href="#" className={ `${ styles.button } ${ styles.titleClose }` } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.master, false) }>
                   <span className={ styles.label }>Close</span>
@@ -261,7 +247,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
               <div className={ styles.showItemsRow }>
                 <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.enlightened, true) }>
-                  <span>Enlightened Items</span>
+                  <span>Enlightened Items ({ enlightenedItems.length })</span>
                 </a>
                 <a href="#" className={ `${ styles.button } ${ styles.titleClose }` } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.enlightened, false) }>
                   <span className={ styles.label }>Close</span>
@@ -273,13 +259,25 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
               <div className={ styles.showItemsRow }>
                 <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.burned, true) }>
-                  <span>Burned Items</span>
+                  <span>Burned Items ({ burnedItems.length })</span>
                 </a>
                 <a href="#" className={ `${ styles.button } ${ styles.titleClose }` } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.burned, false) }>
                   <span className={ styles.label }>Close</span>
                 </a>
                 { (this.state.showItemsPane && this.state.showItemsPaneName == itemPanes.burned ) &&
                   burnedItems
+                }
+              </div>
+
+              <div className={ styles.showItemsRow }>
+                <a href="#" className={ styles.title } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.wanikani, true) }>
+                  <span>Learning in WaniKani ({ wanikaniItems.length })</span>
+                </a>
+                <a href="#" className={ `${ styles.button } ${ styles.titleClose }` } onClick={ () => this.toggleDialog(itemPanes.name, itemPanes.wanikani, false) }>
+                  <span className={ styles.label }>Close</span>
+                </a>
+                { (this.state.showItemsPane && this.state.showItemsPaneName == itemPanes.wanikani ) &&
+                  wanikaniItems
                 }
               </div>
 
@@ -414,14 +412,14 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
     const itemsFromList = await getItemList(this.props.itemsList, this.props);
     const itemsForLesson = itemsFromList.filter(item => item.SRSStage == 0);
     const itemsForReview = itemsFromList.filter(item => item.SRSStage > 0 && item.SRSStage < 9 && (new Date() > new Date(item.Nextreviewtime)));
-    const itemsForNextReviews = itemsFromList.filter(item => item.SRSStage > 0 && item.SRSStage < 9);
+    const itemsForAll = itemsFromList.filter(item => item.SRSStage > 0 && item.SRSStage < 9);
     
     // Wait for items to be retrieved from Items List and add to state.
     this.setState({
       allItems: itemsFromList,
       lessonItems: itemsForLesson,
       reviewItems: itemsForReview,
-      nextReviewsItems: itemsForNextReviews
+      validItems: itemsForAll
     });
   }
 }
