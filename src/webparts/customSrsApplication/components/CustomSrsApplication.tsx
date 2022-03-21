@@ -133,7 +133,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
   public render(): React.ReactElement<ICustomSrsApplicationProps> {
     // TODO TESTING
-    // testFunction(this.props);
+    testFunction(this.props);
 
     // Randomise lesson and review items.
     const lessonItems = this.state.lessonItems.sort(() => Math.random() - 0.5);
