@@ -2,17 +2,37 @@
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
     "name": "custom-srs-application-client-side-solution",
-    "id": "69975778-8f4b-47cb-88ef-23d68f430bd9",
-    "version": "1.0.2.1",
+    "id": "dfdf3dca-6fa7-490c-8c1b-203085c2ba79",
+    "version": "1.0.2.2",
     "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "developer": {
       "name": "",
       "websiteUrl": "",
       "privacyUrl": "",
       "termsOfUseUrl": "",
-      "mpnId": ""
-    }
+      "mpnId": "Undefined-1.14.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "custom-srs-application description"
+      },
+      "longDescription": {
+        "default": "custom-srs-application description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "custom-srs-application Feature",
+        "description": "The feature that activates elements of the custom-srs-application solution.",
+        "id": "753c5baf-cf22-42b7-8582-360010e33e5d",
+        "version": "1.0.0.0"
+      }
+    ]
   },
   "paths": {
     "zippedPackage": "solution/custom-srs-application.sppkg"

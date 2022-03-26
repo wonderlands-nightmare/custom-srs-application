@@ -1,11 +1,15 @@
 {
   "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
     "isCreatingSolution": true,
-    "environment": "spo",
-    "version": "1.11.0",
+    "version": "1.14.0",
     "libraryName": "custom-srs-application",
-    "libraryId": "69975778-8f4b-47cb-88ef-23d68f430bd9",
+    "libraryId": "dfdf3dca-6fa7-490c-8c1b-203085c2ba79",
+    "environment": "spo",
     "packageManager": "npm",
+    "solutionName": "custom-srs-application",
+    "solutionShortDescription": "custom-srs-application description",
+    "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "componentType": "webpart"
   }
