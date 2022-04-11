@@ -18,6 +18,7 @@ export interface ICustomSrsApplicationWebPartProps {
   lessonLimit: number;
   useWanikani: boolean;
   wanikaniApiKey: string;
+  wanikaniApiLevelCap: number;
 }
 
 export default class CustomSrsApplicationWebPart extends BaseClientSideWebPart<ICustomSrsApplicationWebPartProps> {
@@ -36,7 +37,8 @@ export default class CustomSrsApplicationWebPart extends BaseClientSideWebPart<I
         lessonLimit: this.properties.lessonLimit,
         wanikaniDetails: {
           usingWanikani: this.properties.useWanikani,
-          wanikaniApiKey: this.properties.wanikaniApiKey
+          wanikaniApiKey: this.properties.wanikaniApiKey,
+          wanikaniApiLevelCap: this.properties.wanikaniApiLevelCap
         }
       }
     );
@@ -75,6 +77,10 @@ export default class CustomSrsApplicationWebPart extends BaseClientSideWebPart<I
       conditionalGroupFields.push(
         PropertyPaneTextField('wanikaniApiKey', {
           label: strings.WanikaniApiKeyLabel
+        }),
+        PropertyPaneTextField('wanikaniApiLevelCap', {
+          label: strings.WanikaniApiLevelCapLabel,
+          onGetErrorMessage: this.validateNumberTextField.bind(this)
         }),
       );
     }

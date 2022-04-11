@@ -22,7 +22,8 @@
     "officeFabricIconFontName": "Page",
     "properties": {
       "languageSelection": "japanese",
-      "lessonLimit": 10
+      "lessonLimit": 10,
+      "wanikaniApiLevelCap": 0
     }
   }]
 }

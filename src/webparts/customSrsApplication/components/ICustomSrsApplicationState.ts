@@ -14,4 +14,5 @@ export interface ICustomSrsApplicationState {
   showDialogName: string;
   showItemsPane: boolean;
   showItemsPaneName: string;
+  wanikaniUpdateMessage: string;
 }

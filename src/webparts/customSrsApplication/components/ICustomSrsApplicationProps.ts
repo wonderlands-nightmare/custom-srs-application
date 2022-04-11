@@ -12,6 +12,7 @@ export interface ICustomSrsApplicationProps {
   lessonLimit: number;
   wanikaniDetails: {
     usingWanikani: boolean,
-    wanikaniApiKey: string
+    wanikaniApiKey: string,
+    wanikaniApiLevelCap: number
   };
 }
