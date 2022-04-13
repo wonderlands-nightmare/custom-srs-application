@@ -1,11 +1,16 @@
+import jQuery from 'jquery';
+
 import { HttpClient, HttpClientResponse } from '@microsoft/sp-http';
+import { getItemList, updateItem } from '../listOperations/ListOperations';
 
 
-export function getWanikaniData(globalProps, apiEndpoint, apiFilter = "") {
-  const apiEndPath = apiFilter == "" ? apiEndpoint : `${ apiEndpoint }?${ apiFilter }`;
+export function getWanikaniData(globalProps, apiEndpoint, previousResponse = []) {
+  const apiUrl = apiEndpoint.includes("https://api.wanikani.com/v2/")
+               ? apiEndpoint
+               : `https://api.wanikani.com/v2/${ apiEndpoint }`;
 
   return globalProps.httpDetails.httpClient.get(
-    `https://api.wanikani.com/v2/${ apiEndPath }`,
+    apiUrl,
     HttpClient.configurations.v1,
     {
       headers: {
@@ -17,114 +22,60 @@ export function getWanikaniData(globalProps, apiEndpoint, apiFilter = "") {
     return response.json();
   })
   .then((responseBody) => {
-    console.log(`http response body for ${ apiEndpoint }`, responseBody);
+    if (previousResponse.length > 0) {
+      responseBody.data = responseBody.data.concat(previousResponse);
+    }
+
+    if (responseBody.hasOwnProperty('pages')) {
+      if (responseBody.pages.hasOwnProperty('next_url')) {
+        if (responseBody.pages.next_url) {
+          return getWanikaniData(globalProps, responseBody.pages.next_url, responseBody.data);
+        }
+      }
+    }
+    
     return responseBody;
   });
 }
 
 
-export async function testFunction(globalProps) {
-  const itemsData = {
-    subjects: await getWanikaniData(globalProps, 'subjects'),
-    assignments: await getWanikaniData(globalProps, 'assignments', "subject_types=vocabulary"),
-    reviewStatistics: await getWanikaniData(globalProps, 'review_statistics', "subject_type=vocabulary"),
-    studyMaterials: await getWanikaniData(globalProps, 'study_materials', "subject_type=vocabulary")
+export async function wanikaniDataComparison(globalProps) {
+  const currentWanikaniLevel = (await getWanikaniData(globalProps, 'user')).data.level;
+  const wanikaniLevelCap = currentWanikaniLevel + Number(globalProps.wanikaniDetails.wanikaniApiLevelCap);
+  const wanikaniSubjectsData = (await getWanikaniData(globalProps, 'subjects?types=vocabulary')).data;
+  const itemsFromList = await getItemList(globalProps.itemsList, globalProps);
+
+  let srsItemsFilter = itemsFromList.map( item => item.Item );
+  let wanikaniFilteredData = wanikaniSubjectsData.filter(item => srsItemsFilter.includes(item.data.characters));
+
+  let wanikaniFilteredDataFilter = wanikaniFilteredData.map( item => item.data.characters );
+  let srsFilteredData = itemsFromList.filter(item => wanikaniFilteredDataFilter.includes(item.Item));
+
+  const now = new Date().toISOString();
+
+  const columns = [
+    "WaniKani",
+    "WaniKanichecked",
+    "WaniKanilastcheck",
+    "SRSStage"
+  ];
+
+  let returnResult = {
+    success: 0,
+    failure: 0
   };
 
-  console.log('itemsData', itemsData);
-}
+  jQuery.each(srsFilteredData, (index, srsItem) => {
+    if (!srsItem.WaniKanichecked) {
+      const wanikaniItemCheck = wanikaniFilteredData.find(wanikaniItem => wanikaniItem.data.characters == srsItem.Item);
+      srsItem.WaniKani = wanikaniItemCheck.data.level;
+      srsItem.WaniKanichecked = wanikaniItemCheck.data.level <= wanikaniLevelCap;
+      srsItem.WaniKanilastcheck = now;
+      srsItem.SRSStage = wanikaniItemCheck.data.level <= wanikaniLevelCap ? 10 : srsItem.SRSStage;
 
-
-//////////////////////////////
-// ANCHOR Function - getItemList
-// Gets the items from the provided list name using API.
-//////////////////////////////
-export function getItemList(listName, globalProps) {
-  return globalProps.httpDetails.httpClient.get(
-    `${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items?$top=100000`,
-    HttpClient.configurations.v1,
-    {
-      headers: {
-        'Accept': 'application/json;odata=nometadata',
-        'odata-version': ''
-      }
+      updateItem(globalProps.itemsList, srsItem, columns, globalProps) ? returnResult.success++ : returnResult.failure++;
     }
-  )
-  .then((response: HttpClientResponse) => {
-    return response.json();
-  })
-  .then((returnedItems) => {
-    return returnedItems.value;
   });
-}
 
-
-//////////////////////////////
-// ANCHOR Function - createItem
-// Create an item in the Items List using API.
-//////////////////////////////
-export function createItem(globalProps, state) {
-  const listName = globalProps.itemsList;
-  const body: string = JSON.stringify({
-    "Item": state.addNewItemName,
-    "Readings": state.addNewItemReadings,
-    "Meanings": state.addNewItemMeanings,
-  });
-  
-  return globalProps.httpDetails.httpClient.post(
-    `${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items`,
-    HttpClient.configurations.v1,
-    {
-      headers: {
-        'Accept': 'application/json;odata=nometadata',
-        'Content-type': 'application/json;odata=nometadata',
-        'odata-version': ''
-      },
-      body: body
-    }
-  )
-  .then((response: HttpClientResponse) => {
-    return response.json();
-  })
-  .then((createdItem) => {
-    return `${ createdItem.Item } has been created!`;
-  },
-  (error: any) => {
-    return "There was an error creating items, see console for details.";
-  });
-}
-
-
-//////////////////////////////
-// ANCHOR Function - updateItem
-// Update an item in the Items List using API.
-//////////////////////////////
-export function updateItem(listName, itemToUpdate, globalProps) {
-  const itemId = itemToUpdate.ID;
-
-  const body: string = JSON.stringify({
-    "SRSStage": itemToUpdate.SRSStage,
-    "Nextreviewtime": itemToUpdate.Nextreviewtime
-  });
-  
-  return globalProps.httpDetails.httpClient.post(
-    `${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items(${itemId})`,
-    HttpClient.configurations.v1,
-    {
-      headers: {
-        'Accept': 'application/json;odata=nometadata',
-        'Content-type': 'application/json;odata=nometadata',
-        'odata-version': '',
-        'IF-MATCH': '*',
-        'X-HTTP-Method': 'MERGE'
-      },
-      body: body
-    }
-  )
-  .then((response: HttpClientResponse) => {
-    return `${ itemId } has been created!`;
-  },
-  (error: any) => {
-    return "There was an error updating the item, see console for details.";
-  });
+  return returnResult;
 }

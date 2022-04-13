@@ -215,7 +215,12 @@ export default class SrsReviewSession extends React.Component<ISrsReviewSessionP
 
     // Update item in list if both answers are correct.
     if (itemReviewCorrect) {
-      updateItem(this.props.globalProps.itemsList, reviewItem, this.props.globalProps);
+      const columns = [
+        "SRSStage",
+        "Nextreviewtime"
+      ];
+
+      updateItem(this.props.globalProps.itemsList, reviewItem, columns, this.props.globalProps);
     }
   }
 

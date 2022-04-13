@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 
 //////////////////////////////
@@ -64,13 +66,15 @@ export function createItem(globalProps, state) {
 // ANCHOR Function - updateItem
 // Update an item in the Items List using API.
 //////////////////////////////
-export function updateItem(listName, itemToUpdate, globalProps) {
+export function updateItem(listName, itemToUpdate, columns, globalProps) {
   const itemId = itemToUpdate.ID;
 
-  const body: string = JSON.stringify({
-    "SRSStage": itemToUpdate.SRSStage,
-    "Nextreviewtime": itemToUpdate.Nextreviewtime
+  const bodyData = {};
+  jQuery.each(columns, (index, itemKey) => {
+    bodyData[itemKey] = itemToUpdate[itemKey];
   });
+
+  const body: string = JSON.stringify(bodyData);
   
   return globalProps.httpDetails.spHttpClient.post(
     `${ globalProps.siteUrl }/_api/web/lists/getbytitle('${ listName }')/items(${itemId})`,
@@ -87,9 +91,9 @@ export function updateItem(listName, itemToUpdate, globalProps) {
     }
   )
   .then((response: SPHttpClientResponse) => {
-    return `${ itemId } has been created!`;
+    return true;
   },
   (error: any) => {
-    return "There was an error updating the item, see console for details.";
+    return false;
   });
 }

@@ -3,6 +3,7 @@ declare interface ICustomSrsApplicationWebPartStrings {
   LanguageSelectFieldLabel: string;
   LessonLimitFieldLabel: string;
   WanikaniApiKeyLabel: string;
+  WanikaniApiLevelCapLabel: string;
 }
 
 declare module 'CustomSrsApplicationWebPartStrings' {

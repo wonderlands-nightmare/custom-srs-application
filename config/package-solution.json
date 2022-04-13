@@ -3,7 +3,7 @@
   "solution": {
     "name": "custom-srs-application-client-side-solution",
     "id": "dfdf3dca-6fa7-490c-8c1b-203085c2ba79",
-    "version": "1.0.2.2",
+    "version": "1.0.3.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,

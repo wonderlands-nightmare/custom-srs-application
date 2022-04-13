@@ -12,7 +12,7 @@ import SrsReviewSession from './srsReviewSession/SrsReviewSession';
 import SrsLessonSession from './srsLessonSession/SrsLessonSession';
 import NextReviews from './nextReviews/NextReviews';
 
-import { testFunction } from './wanikaniIntegration/WanikaniIntegration';
+import { getWanikaniData, wanikaniDataComparison } from './wanikaniIntegration/WanikaniIntegration';
 
 //////////////////////////////
 // ANCHOR Interfaces
@@ -121,7 +121,8 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
       showDialog: false,
       showDialogName: '',
       showItemsPane: false,
-      showItemsPaneName: ''
+      showItemsPaneName: '',
+      wanikaniUpdateMessage: null
     };
   }
 
@@ -133,7 +134,7 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
 
   public render(): React.ReactElement<ICustomSrsApplicationProps> {
     // TODO TESTING
-    testFunction(this.props);
+    // wanikaniDataComparison(this.props);
 
     // Randomise lesson and review items.
     const lessonItems = this.state.lessonItems.sort(() => Math.random() - 0.5);
@@ -168,6 +169,12 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
           <div className={ `${ styles.row } ${ styles.flexRow }` }>
             <a href="#" className={ `${ styles.button } ${ styles.refreshButton }` } onClick={ () => this.updateItemsInState() }>
               <span className={ styles.label }>Refresh items</span>
+            </a>
+            <a href="#" className={ `${ styles.button } ${ styles.refreshButton }` } onClick={ () => this.wanikaniUpdateCountHandler() }>
+              <span className={ styles.label }>Compare against WaniKani</span>
+              { this.state.wanikaniUpdateMessage != null &&
+                <span className={ styles.label }>( { this.state.wanikaniUpdateMessage } )</span>
+              }
             </a>
           </div>
           <div className={ `${ styles.row } ${ styles.flexRow }` }>
@@ -420,6 +427,25 @@ export default class CustomSrsApplication extends React.Component<ICustomSrsAppl
       lessonItems: itemsForLesson,
       reviewItems: itemsForReview,
       validItems: itemsForAll
+    });
+  }
+
+
+  //////////////////////////////
+  // ANCHOR Function - wanikaniUpdateCountHandler
+  // Event handler for text input field to set value to state for further processing.
+  //////////////////////////////
+  private async wanikaniUpdateCountHandler() {
+    this.setState({
+      ...this.state,
+      wanikaniUpdateMessage: `Running...`
+    });
+
+    const resultCounts = await wanikaniDataComparison(this.props);
+
+    this.setState({
+      ...this.state,
+      wanikaniUpdateMessage: `${ resultCounts.success } succeeded, ${ resultCounts.failure } failed`
     });
   }
 }
